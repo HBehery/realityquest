@@ -60,38 +60,48 @@ export async function POST(request: Request) {
 
     const hashedPassword = await hash(password, 10);
 
-    // Insert into users table
-    const response = await sql`
-    INSERT INTO users (email, username, password, full_name, age, ticket)
-    VALUES (${email}, ${username}, ${hashedPassword}, ${fullName}, ${age}, ${ticket}) 
-    RETURNING id
-    `;
+    // Use a transaction to ensure all operations succeed together
+    const client = await sql.connect();
 
-    const userId = response.rows[0].id;
+    try {
+      await client.query("BEGIN");
 
-    // Insert into game_data table
-    // await sql`
-    // INSERT INTO game_data (team_id)
-    // VALUES (${userId})
-    // `;
+      // Insert into users table
+      const response = await client.query(
+        "INSERT INTO users (email, username, password, full_name, age, ticket) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+        [email, username, hashedPassword, fullName, age, ticket]
+      );
 
-    // Insert mission 1 into missions table
-    await sql`
-    INSERT INTO missions (team_id, mission)
-    VALUES (${userId}, ${1})
-    `;
+      const userId = response.rows[0].id;
 
-    // Insert mission 2 into missions table
-    await sql`
-    INSERT INTO missions (team_id, mission)
-    VALUES (${userId}, ${2})
-    `;
+      // Insert mission 1 into missions table
+      await client.query(
+        "INSERT INTO missions (team_id, mission) VALUES ($1, $2)",
+        [userId, 1]
+      );
 
-    // Insert mission 3 into missions table
-    await sql`
-    INSERT INTO missions (team_id, mission)
-    VALUES (${userId}, ${3})
-    `;
+      // Insert mission 2 into missions table
+      await client.query(
+        "INSERT INTO missions (team_id, mission) VALUES ($1, $2)",
+        [userId, 2]
+      );
+
+      // Insert mission 3 into missions table
+      await client.query(
+        "INSERT INTO missions (team_id, mission) VALUES ($1, $2)",
+        [userId, 3]
+      );
+
+      // Commit the transaction if all operations succeed
+      await client.query("COMMIT");
+    } catch (transactionError) {
+      // Rollback the transaction if any operation fails
+      await client.query("ROLLBACK");
+      throw transactionError; // Re-throw to be caught by the outer catch block
+    } finally {
+      // Release the client connection
+      client.release();
+    }
 
     // Insert the user themselves into team_members table, then add team members
     // await sql`
@@ -127,6 +137,7 @@ export async function POST(request: Request) {
     //   }
     // }
   } catch (e: any) {
+    console.log(e);
     if (e.code === "23505") {
       if (e.message.includes("users_lower_idx")) {
         return NextResponse.json(
