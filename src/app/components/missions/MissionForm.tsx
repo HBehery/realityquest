@@ -180,7 +180,7 @@ const MissionForm = ({ mission }: { mission: number }) => {
   };
 
   return (
-    <div className="h-full justify-center text-center pb-16 md:mx-auto flex flex-col items-center overflow-auto min-h-screen">
+    <div className="size-full justify-center text-center py-12 flex flex-col items-center min-h-full">
       <div className="flex flex-col items-center text-center sm:w-3/4 w-full md:max-w-lg px-4">
         <VideoFrame videoLink={missionData[mission].video} mission={mission} />
 
