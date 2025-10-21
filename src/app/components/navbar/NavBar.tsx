@@ -141,8 +141,18 @@ const NavBar = () => {
             role="button"
             className="btn btn-ghost btn-circle avatar"
           >
-            <div className="rounded-full">
-              <RxAvatar size={25} />
+            <div className="rounded-full w-6 h-6 overflow-hidden">
+              {session?.user?.image ? (
+                <Image
+                  src={session.user.image}
+                  alt="Profile"
+                  width={40}
+                  height={40}
+                  className="object-cover"
+                />
+              ) : (
+                <RxAvatar size={25} />
+              )}
             </div>
           </div>
           <ul
@@ -160,9 +170,19 @@ const NavBar = () => {
               </li>
             )}
             {!!session && (
-              <li className="text-white">
-                <Logout />
-              </li>
+              <>
+                <li>
+                  <Link
+                    className="dark:focus:text-white focus:text-white text-white"
+                    href="/profile"
+                  >
+                    Profile
+                  </Link>
+                </li>
+                <li className="text-white">
+                  <Logout />
+                </li>
+              </>
             )}
           </ul>
         </div>

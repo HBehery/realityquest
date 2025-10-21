@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { sql } from "@vercel/postgres";
 
 const usernameRegex = /^[a-zA-Z0-9_]{3,36}$/;
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
@@ -21,7 +21,7 @@ const handler = NextAuth({
         }
 
         const response = await sql`
-        SELECT * FROM users WHERE username=${credentials?.username}`;
+        SELECT id, username, password, profile_photo FROM users WHERE username=${credentials?.username}`;
         const user = response.rows[0];
 
         if (user) {
@@ -34,6 +34,7 @@ const handler = NextAuth({
             return {
               id: user.id,
               username: user.username,
+              image: user.profile_photo,
             };
           } else {
             throw new Error("IncorrectPassword");
@@ -54,9 +55,27 @@ const handler = NextAuth({
         token.user = user;
       }
 
+      // Refresh user data from database when session is updated
+      if (trigger === "update" && token.user) {
+        const userResponse = await sql`
+          SELECT id, username, profile_photo FROM users WHERE id=${
+            (token.user as any).id
+          }
+        `;
+
+        if (userResponse.rows[0]) {
+          token.user = {
+            ...(token.user as any),
+            image: userResponse.rows[0].profile_photo,
+          };
+        }
+      }
+
       return token;
     },
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
