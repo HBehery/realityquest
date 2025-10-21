@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "../auth/[...nextauth]/authOptions";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client, S3_BUCKET_NAME, S3_REGION } from "@/lib/s3";
 import { sql } from "@vercel/postgres";

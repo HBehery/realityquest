@@ -22,7 +22,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center dark:text-white p-4">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-8 max-w-md w-full">
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-xl p-8 max-w-md w-full">
         <ProfilePhotoUpload
           currentPhoto={session.user.image}
           username={session.user.username}

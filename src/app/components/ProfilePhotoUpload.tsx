@@ -106,7 +106,7 @@ export default function ProfilePhotoUpload({
             />
           ) : (
             <div className="w-full h-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center">
-              <RxAvatar size={80} className="text-gray-400" />
+              <RxAvatar size={160} className="text-gray-400" />
             </div>
           )}
 
